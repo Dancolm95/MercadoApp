@@ -1,0 +1,64 @@
+@model MercadoApp.Models.Puesto
+
+@{
+    ViewData["Title"] = "Crear Puesto";
+}
+
+<h2>Crear Puesto</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="NumeroPuesto" class="form-label"></label>
+                <input asp-for="NumeroPuesto" class="form-control" />
+                <span asp-validation-for="NumeroPuesto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Seccion" class="form-label"></label>
+                <select asp-for="Seccion" class="form-select">
+                    <option value="">Seleccione una sección...</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+                <span asp-validation-for="Seccion" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="AreaM2" class="form-label"></label>
+                <input asp-for="AreaM2" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="AreaM2" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Estado" class="form-label"></label>
+                <select asp-for="Estado" class="form-select">
+                    <option value="">Seleccione un estado...</option>
+                    <option value="Libre">Libre</option>
+                    <option value="Alquilado">Alquilado</option>
+                    <option value="Vendido">Vendido</option>
+                </select>
+                <span asp-validation-for="Estado" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MontoMensual" class="form-label"></label>
+                <input asp-for="MontoMensual" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="MontoMensual" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

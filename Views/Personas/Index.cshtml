@@ -1,0 +1,49 @@
+@model IEnumerable<MercadoApp.Models.Persona>
+
+@{
+    ViewData["Title"] = "Gestión de Personas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Gestión de Personas</h2>
+    <a asp-action="Create" class="btn btn-primary">+ Registrar persona</a>
+</div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Mensaje"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>DNI</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Teléfono</th>
+            <th>Puestos asignados</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.DNI</td>
+                <td>@item.Nombres</td>
+                <td>@item.Apellidos</td>
+                <td>@item.Telefono</td>
+                <td><!-- Placeholder for Módulo 3 / relation --> N/A </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdPersona" class="btn btn-sm btn-warning">Editar</a>
+                    <form asp-action="Delete" asp-route-id="@item.IdPersona" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar esta persona?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
