@@ -9,7 +9,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create" method="post">
+        <form id="formCrearDeuda" asp-action="Create" method="post">
             <div class="mb-3">
                 <label asp-for="IdPuesto" class="form-label"></label>
                 <select asp-for="IdPuesto" class="form-select" asp-items="ViewBag.Puestos">
@@ -47,9 +47,11 @@
                 <label asp-for="Pagada" class="form-check-label">¿Ya está pagada?</label>
             </div>
 
+            <div id="alertMessage" class="alert d-none" role="alert"></div>
+
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary">Registrar</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
             </div>
         </form>
     </div>
@@ -57,4 +59,46 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.getElementById('formCrearDeuda').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevenir recarga
+            
+            // Validar form
+            if (!$(this).valid()) return;
+
+            const data = {
+                IdPuesto: parseInt(document.getElementById('IdPuesto').value),
+                TipoServicio: document.getElementById('TipoServicio').value,
+                Monto: parseFloat(document.getElementById('Monto').value),
+                FechaGenerada: document.getElementById('FechaGenerada').value,
+                Pagada: document.getElementById('Pagada').checked
+            };
+
+            fetch('/api/deudas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Error al registrar la deuda');
+            })
+            .then(result => {
+                const alertDiv = document.getElementById('alertMessage');
+                alertDiv.className = 'alert alert-success mt-3';
+                alertDiv.textContent = '¡Deuda registrada exitosamente!';
+                document.getElementById('formCrearDeuda').reset();
+            })
+            .catch(error => {
+                const alertDiv = document.getElementById('alertMessage');
+                alertDiv.className = 'alert alert-danger mt-3';
+                alertDiv.textContent = error.message;
+            });
+        });
+    </script>
 }

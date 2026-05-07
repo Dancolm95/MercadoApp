@@ -9,7 +9,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create" method="post">
+        <form id="formCrearPago" asp-action="Create" method="post">
             <div class="mb-3">
                 <label asp-for="IdDeuda" class="form-label"></label>
                 <select asp-for="IdDeuda" class="form-select" asp-items="ViewBag.Deudas">
@@ -44,9 +44,11 @@
                 <span asp-validation-for="Referencia" class="text-danger"></span>
             </div>
 
+            <div id="alertMessage" class="alert d-none" role="alert"></div>
+
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary">Registrar Pago</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
             </div>
         </form>
     </div>
@@ -54,4 +56,46 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.getElementById('formCrearPago').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevenir recarga
+            
+            // Validar form
+            if (!$(this).valid()) return;
+
+            const data = {
+                IdDeuda: parseInt(document.getElementById('IdDeuda').value),
+                IdPersona: parseInt(document.getElementById('IdPersona').value),
+                MontoPagado: parseFloat(document.getElementById('MontoPagado').value),
+                FechaPago: document.getElementById('FechaPago').value,
+                Referencia: document.getElementById('Referencia').value
+            };
+
+            fetch('/api/pagos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Error al registrar el pago');
+            })
+            .then(result => {
+                const alertDiv = document.getElementById('alertMessage');
+                alertDiv.className = 'alert alert-success mt-3';
+                alertDiv.textContent = '¡Pago registrado exitosamente!';
+                document.getElementById('formCrearPago').reset();
+            })
+            .catch(error => {
+                const alertDiv = document.getElementById('alertMessage');
+                alertDiv.className = 'alert alert-danger mt-3';
+                alertDiv.textContent = error.message;
+            });
+        });
+    </script>
 }

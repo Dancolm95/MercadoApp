@@ -25,6 +25,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Enable CORS
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
