@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option csharp_namespace = "MercadoApp.Protos";
+
+package deudas;
+
+// El servicio de Deudas
+service DeudaService {
+  // Obtiene todas las deudas
+  rpc GetDeudas (EmptyRequest) returns (DeudaListResponse);
+  
+  // Obtiene deudas por puesto
+  rpc GetDeudasByPuesto (PuestoRequest) returns (DeudaListResponse);
+}
+
+message EmptyRequest {}
+
+message PuestoRequest {
+  int32 idPuesto = 1;
+}
+
+message DeudaMessage {
+  int32 idDeuda = 1;
+  int32 idPuesto = 2;
+  string tipoServicio = 3;
+  double monto = 4;
+  string fechaGenerada = 5;
+  bool pagada = 6;
+  string numeroPuesto = 7;
+}
+
+message DeudaListResponse {
+  repeated DeudaMessage deudas = 1;
+}

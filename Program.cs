@@ -9,6 +9,7 @@ builder.Services.AddScoped<IPuestoRepository, PuestoRepository>();
 builder.Services.AddScoped<IPersonaRepository, PersonaRepository>();
 builder.Services.AddScoped<IDeudaRepository, DeudaRepository>();
 builder.Services.AddScoped<IPagoRepository, PagoRepository>();
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
@@ -36,5 +37,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapGrpcService<MercadoApp.Services.GrpcDeudaService>();
 
 app.Run();

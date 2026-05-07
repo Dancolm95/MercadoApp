@@ -18,4 +18,8 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Protobuf Include="Protos\deuda.proto" GrpcServices="Server" />
+  </ItemGroup>
+
 </Project>
