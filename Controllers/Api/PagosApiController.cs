@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MercadoApp.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/pagos")]
     [ApiController]
     public class PagosApiController : ControllerBase
     {

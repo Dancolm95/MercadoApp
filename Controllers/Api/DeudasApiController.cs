@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MercadoApp.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/deudas")]
     [ApiController]
     public class DeudasApiController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace MercadoApp.Controllers.Api
             _deudaRepository = deudaRepository;
         }
 
-        // GET: api/deudasapi
+        // GET: api/deudas
         [HttpGet]
         public ActionResult<IEnumerable<Deuda>> GetDeudas()
         {
@@ -24,7 +24,7 @@ namespace MercadoApp.Controllers.Api
             return Ok(deudas);
         }
 
-        // GET: api/deudasapi/puesto/5
+        // GET: api/deudas/puesto/5
         [HttpGet("puesto/{idPuesto}")]
         public ActionResult<IEnumerable<Deuda>> GetDeudasByPuesto(int idPuesto)
         {
@@ -32,7 +32,7 @@ namespace MercadoApp.Controllers.Api
             return Ok(deudas);
         }
 
-        // POST: api/deudasapi
+        // POST: api/deudas
         [HttpPost]
         public ActionResult<Deuda> PostDeuda([FromBody] Deuda deuda)
         {
