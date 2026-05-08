@@ -10,5 +10,9 @@ namespace MercadoApp.Repositories.Interfaces
         void RegistrarPago(Pago pago);
         void Update(Pago pago);
         void Delete(int id);
+        int GetCount();
+        decimal GetTotalIngresos();
+        IEnumerable<Pago> GetByFecha(DateTime fechaInicio, DateTime fechaFin);
+        IEnumerable<Pago> GetRecent(int count);
     }
 }

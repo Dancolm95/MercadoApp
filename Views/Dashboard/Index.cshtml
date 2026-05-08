@@ -1,0 +1,192 @@
+@model MercadoApp.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard - Mercado";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Panel de Control</h2>
+    <a asp-controller="Reportes" asp-action="Index" class="btn btn-info">Ver Reportes</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Puestos</h5>
+                <h2>@Model.TotalPuestos</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Puestos Alquilados</h5>
+                <h2>@Model.PuestosAlquilados</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">Puestos Vendidos</h5>
+                <h2>@Model.PuestosVendidos</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Puestos Libres</h5>
+                <h2>@Model.PuestosLibres</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 class="card-title">Deudas Pendientes</h5>
+                <h2>@Model.DeudasPendientes</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Deudas Pagadas</h5>
+                <h2>@Model.DeudasPagadas</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white" style="background-color: #e67e22;">
+            <div class="card-body">
+                <h5 class="card-title">Monto Pendiente</h5>
+                <h4>@Model.TotalMontoPendiente.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Ingresos</h5>
+                <h4>@Model.TotalIngresos.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Puestos Recientes</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Sección</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.PuestosRecientes)
+                        {
+                            <tr>
+                                <td>@item.NumeroPuesto</td>
+                                <td>@item.Seccion</td>
+                                <td>
+                                    @{
+                                        var badgeClass = item.Estado switch
+                                        {
+                                            "Alquilado" => "bg-primary",
+                                            "Vendido" => "bg-success",
+                                            "Libre" => "bg-secondary",
+                                            _ => "bg-info"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@item.Estado</span>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.PuestosRecientes.Any())
+                        {
+                            <tr><td colspan="3" class="text-center">No hay puestos</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Deudas Recientes</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Puesto</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.DeudasRecientes)
+                        {
+                            <tr>
+                                <td>@item.NumeroPuesto</td>
+                                <td>@item.TipoServicio</td>
+                                <td>@item.Monto.ToString("C")</td>
+                            </tr>
+                        }
+                        @if (!Model.DeudasRecientes.Any())
+                        {
+                            <tr><td colspan="3" class="text-center">No hay deudas</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Pagos Recientes</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Persona</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.PagosRecientes)
+                        {
+                            <tr>
+                                <td>@item.NombrePersona</td>
+                                <td>@item.MontoPagado.ToString("C")</td>
+                                <td>@item.FechaPago.ToShortDateString()</td>
+                            </tr>
+                        }
+                        @if (!Model.PagosRecientes.Any())
+                        {
+                            <tr><td colspan="3" class="text-center">No hay pagos</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+@model MercadoApp.Models.ReportePuestoViewModel
+
+@{
+    ViewData["Title"] = "Reporte de Puestos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Reporte de Puestos</h2>
+    <div>
+        <a asp-action="Index" class="btn btn-secondary">Nuevo Reporte</a>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-primary">Dashboard</a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <strong>Estado:</strong> @(ViewBag.Estado ?? "Todos")
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5>Total Puestos: @Model.Cantidad</h5>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>N° Puesto</th>
+            <th>Sección</th>
+            <th>Área (M2)</th>
+            <th>Estado</th>
+            <th>Monto Mensual</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Puestos)
+        {
+            <tr>
+                <td>@item.NumeroPuesto</td>
+                <td>@item.Seccion</td>
+                <td>@item.AreaM2</td>
+                <td>
+                    @{
+                        var badgeClass = item.Estado switch
+                        {
+                            "Alquilado" => "bg-primary",
+                            "Vendido" => "bg-success",
+                            "Libre" => "bg-secondary",
+                            _ => "bg-info"
+                        };
+                    }
+                    <span class="badge @badgeClass">@item.Estado</span>
+                </td>
+                <td>@item.MontoMensual.ToString("C")</td>
+            </tr>
+        }
+        @if (!Model.Puestos.Any())
+        {
+            <tr><td colspan="5" class="text-center">No hay puestos</td></tr>
+        }
+    </tbody>
+</table>

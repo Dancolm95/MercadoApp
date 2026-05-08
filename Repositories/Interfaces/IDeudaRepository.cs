@@ -11,5 +11,9 @@ namespace MercadoApp.Repositories.Interfaces
         void RegistrarDeuda(Deuda deuda);
         void Update(Deuda deuda);
         void Delete(int id);
+        int GetCountByEstado(bool pagada);
+        decimal GetTotalMonto(bool pagada);
+        IEnumerable<Deuda> GetByFecha(DateTime fechaInicio, DateTime fechaFin);
+        IEnumerable<Deuda> GetRecent(int count);
     }
 }

@@ -1,0 +1,64 @@
+@model MercadoApp.Models.ReportePagoViewModel
+
+@{
+    ViewData["Title"] = "Reporte de Ingresos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Reporte de Ingresos</h2>
+    <div>
+        <a asp-action="Index" class="btn btn-secondary">Nuevo Reporte</a>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-primary">Dashboard</a>
+    </div>
+</div>
+
+<div class="alert alert-success">
+    <strong>Período:</strong> @ViewBag.FechaInicio hasta @ViewBag.FechaFin
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5>Total Pagos: @Model.Cantidad</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Ingresos Totales: @Model.TotalIngresos.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Persona</th>
+            <th>Deuda</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Referencia</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Pagos)
+        {
+            <tr>
+                <td>@item.IdPago</td>
+                <td>@item.NombrePersona</td>
+                <td>@item.DetallesDeuda</td>
+                <td class="text-success fw-bold">@item.MontoPagado.ToString("C")</td>
+                <td>@item.FechaPago.ToShortDateString()</td>
+                <td>@item.Referencia</td>
+            </tr>
+        }
+        @if (!Model.Pagos.Any())
+        {
+            <tr><td colspan="6" class="text-center">No hay pagos en este período</td></tr>
+        }
+    </tbody>
+</table>

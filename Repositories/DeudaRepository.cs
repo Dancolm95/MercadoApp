@@ -173,5 +173,96 @@ namespace MercadoApp.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public int GetCountByEstado(bool pagada)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand("SELECT COUNT(*) FROM Deuda WHERE Pagada = @Pagada", con);
+                cmd.Parameters.AddWithValue("@Pagada", pagada);
+                con.Open();
+                return (int)cmd.ExecuteScalar();
+            }
+        }
+
+        public decimal GetTotalMonto(bool pagada)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand("SELECT ISNULL(SUM(Monto), 0) FROM Deuda WHERE Pagada = @Pagada", con);
+                cmd.Parameters.AddWithValue("@Pagada", pagada);
+                con.Open();
+                return Convert.ToDecimal(cmd.ExecuteScalar());
+            }
+        }
+
+        public IEnumerable<Deuda> GetByFecha(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var deudas = new List<Deuda>();
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT d.IdDeuda, d.IdPuesto, d.TipoServicio, d.Monto, d.FechaGenerada, d.Pagada, p.NumeroPuesto 
+                    FROM Deuda d
+                    INNER JOIN Puesto p ON d.IdPuesto = p.IdPuesto
+                    WHERE d.FechaGenerada BETWEEN @FechaInicio AND @FechaFin
+                    ORDER BY d.FechaGenerada DESC";
+
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@FechaInicio", fechaInicio);
+                cmd.Parameters.AddWithValue("@FechaFin", fechaFin);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        deudas.Add(new Deuda
+                        {
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPuesto = Convert.ToInt32(reader["IdPuesto"]),
+                            TipoServicio = reader["TipoServicio"].ToString(),
+                            Monto = Convert.ToDecimal(reader["Monto"]),
+                            FechaGenerada = Convert.ToDateTime(reader["FechaGenerada"]),
+                            Pagada = Convert.ToBoolean(reader["Pagada"]),
+                            NumeroPuesto = reader["NumeroPuesto"].ToString()
+                        });
+                    }
+                }
+            }
+            return deudas;
+        }
+
+        public IEnumerable<Deuda> GetRecent(int count)
+        {
+            var deudas = new List<Deuda>();
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = $@"
+                    SELECT TOP {count} d.IdDeuda, d.IdPuesto, d.TipoServicio, d.Monto, d.FechaGenerada, d.Pagada, p.NumeroPuesto 
+                    FROM Deuda d
+                    INNER JOIN Puesto p ON d.IdPuesto = p.IdPuesto
+                    ORDER BY d.IdDeuda DESC";
+
+                var cmd = new SqlCommand(query, con);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        deudas.Add(new Deuda
+                        {
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPuesto = Convert.ToInt32(reader["IdPuesto"]),
+                            TipoServicio = reader["TipoServicio"].ToString(),
+                            Monto = Convert.ToDecimal(reader["Monto"]),
+                            FechaGenerada = Convert.ToDateTime(reader["FechaGenerada"]),
+                            Pagada = Convert.ToBoolean(reader["Pagada"]),
+                            NumeroPuesto = reader["NumeroPuesto"].ToString()
+                        });
+                    }
+                }
+            }
+            return deudas;
+        }
     }
 }

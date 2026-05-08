@@ -10,5 +10,7 @@ namespace MercadoApp.Repositories.Interfaces
         void Create(Puesto puesto);
         void Update(Puesto puesto);
         void Delete(int id);
+        int GetCountByEstado(string estado);
+        IEnumerable<Puesto> GetRecent(int count);
     }
 }

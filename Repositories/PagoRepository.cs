@@ -170,5 +170,104 @@ namespace MercadoApp.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public int GetCount()
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand("SELECT COUNT(*) FROM Pago", con);
+                con.Open();
+                return (int)cmd.ExecuteScalar();
+            }
+        }
+
+        public decimal GetTotalIngresos()
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand("SELECT ISNULL(SUM(MontoPagado), 0) FROM Pago", con);
+                con.Open();
+                return Convert.ToDecimal(cmd.ExecuteScalar());
+            }
+        }
+
+        public IEnumerable<Pago> GetByFecha(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var pagos = new List<Pago>();
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                           d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                           per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                    FROM Pago p
+                    INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                    INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                    INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                    WHERE p.FechaPago BETWEEN @FechaInicio AND @FechaFin
+                    ORDER BY p.FechaPago DESC";
+
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@FechaInicio", fechaInicio);
+                cmd.Parameters.AddWithValue("@FechaFin", fechaFin);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        pagos.Add(new Pago
+                        {
+                            IdPago = Convert.ToInt32(reader["IdPago"]),
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPersona = Convert.ToInt32(reader["IdPersona"]),
+                            FechaPago = Convert.ToDateTime(reader["FechaPago"]),
+                            MontoPagado = Convert.ToDecimal(reader["MontoPagado"]),
+                            Referencia = reader["Referencia"].ToString(),
+                            DetallesDeuda = reader["DetallesDeuda"].ToString(),
+                            NombrePersona = reader["NombrePersona"].ToString()
+                        });
+                    }
+                }
+            }
+            return pagos;
+        }
+
+        public IEnumerable<Pago> GetRecent(int count)
+        {
+            var pagos = new List<Pago>();
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = $@"
+                    SELECT TOP {count} p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                           d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                           per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                    FROM Pago p
+                    INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                    INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                    INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                    ORDER BY p.IdPago DESC";
+
+                var cmd = new SqlCommand(query, con);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        pagos.Add(new Pago
+                        {
+                            IdPago = Convert.ToInt32(reader["IdPago"]),
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPersona = Convert.ToInt32(reader["IdPersona"]),
+                            FechaPago = Convert.ToDateTime(reader["FechaPago"]),
+                            MontoPagado = Convert.ToDecimal(reader["MontoPagado"]),
+                            Referencia = reader["Referencia"].ToString(),
+                            DetallesDeuda = reader["DetallesDeuda"].ToString(),
+                            NombrePersona = reader["NombrePersona"].ToString()
+                        });
+                    }
+                }
+            }
+            return pagos;
+        }
     }
 }

@@ -121,5 +121,43 @@ namespace MercadoApp.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public int GetCountByEstado(string estado)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand("SELECT COUNT(*) FROM Puesto WHERE Estado = @Estado", con);
+                cmd.Parameters.AddWithValue("@Estado", estado);
+                con.Open();
+                return (int)cmd.ExecuteScalar();
+            }
+        }
+
+        public IEnumerable<Puesto> GetRecent(int count)
+        {
+            var puestos = new List<Puesto>();
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var cmd = new SqlCommand($"SELECT TOP {count} IdPuesto, NumeroPuesto, Seccion, AreaM2, Estado, MontoMensual, IdPersona FROM Puesto ORDER BY IdPuesto DESC", con);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        puestos.Add(new Puesto
+                        {
+                            Id = Convert.ToInt32(reader["IdPuesto"]),
+                            NumeroPuesto = reader["NumeroPuesto"].ToString(),
+                            Seccion = reader["Seccion"].ToString(),
+                            AreaM2 = Convert.ToDecimal(reader["AreaM2"]),
+                            Estado = reader["Estado"].ToString(),
+                            MontoMensual = Convert.ToDecimal(reader["MontoMensual"]),
+                            IdPersona = reader["IdPersona"] != DBNull.Value ? Convert.ToInt32(reader["IdPersona"]) : (int?)null
+                        });
+                    }
+                }
+            }
+            return puestos;
+        }
     }
 }
