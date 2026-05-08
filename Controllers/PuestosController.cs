@@ -67,5 +67,12 @@ namespace MercadoApp.Controllers
             TempData["Mensaje"] = "Puesto eliminado correctamente de la base de datos.";
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult Details(int id)
+        {
+            var puesto = _puestoRepository.GetById(id);
+            if (puesto == null) return NotFound();
+            return View(puesto);
+        }
     }
 }

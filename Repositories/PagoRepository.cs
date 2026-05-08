@@ -90,5 +90,85 @@ namespace MercadoApp.Repositories
                 }
             }
         }
+
+        public Pago? GetById(int id)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                           d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                           per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                    FROM Pago p
+                    INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                    INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                    INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                    WHERE p.IdPago = @Id";
+
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Pago
+                        {
+                            IdPago = Convert.ToInt32(reader["IdPago"]),
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPersona = Convert.ToInt32(reader["IdPersona"]),
+                            FechaPago = Convert.ToDateTime(reader["FechaPago"]),
+                            MontoPagado = Convert.ToDecimal(reader["MontoPagado"]),
+                            Referencia = reader["Referencia"].ToString(),
+                            DetallesDeuda = reader["DetallesDeuda"].ToString(),
+                            NombrePersona = reader["NombrePersona"].ToString()
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+
+        public void Update(Pago pago)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                con.Open();
+                using (var transaction = con.BeginTransaction())
+                {
+                    try
+                    {
+                        var cmd = new SqlCommand(
+                            "UPDATE Pago SET IdDeuda = @IdDeuda, IdPersona = @IdPersona, FechaPago = @FechaPago, MontoPagado = @MontoPagado, Referencia = @Referencia WHERE IdPago = @IdPago", con, transaction);
+                        cmd.Parameters.AddWithValue("@IdPago", pago.IdPago);
+                        cmd.Parameters.AddWithValue("@IdDeuda", pago.IdDeuda);
+                        cmd.Parameters.AddWithValue("@IdPersona", pago.IdPersona);
+                        cmd.Parameters.AddWithValue("@FechaPago", pago.FechaPago);
+                        cmd.Parameters.AddWithValue("@MontoPagado", pago.MontoPagado);
+                        cmd.Parameters.AddWithValue("@Referencia", pago.Referencia ?? (object)DBNull.Value);
+                        cmd.ExecuteNonQuery();
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public void Delete(int id)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Pago WHERE IdPago = @Id";
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

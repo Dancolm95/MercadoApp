@@ -1,0 +1,70 @@
+@model MercadoApp.Models.Puesto
+
+@{
+    ViewData["Title"] = "Detalles del Puesto";
+}
+
+<h2>Detalles del Puesto</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Id)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Id)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.NumeroPuesto)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.NumeroPuesto)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Seccion)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Seccion)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.AreaM2)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.AreaM2) m²
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Estado)
+            </dt>
+            <dd class="col-sm-8">
+                @{
+                    var badgeClass = Model.Estado switch
+                    {
+                        "Alquilado" => "bg-primary",
+                        "Vendido" => "bg-success",
+                        "Libre" => "bg-secondary",
+                        _ => "bg-info"
+                    };
+                }
+                <span class="badge @badgeClass">@Model.Estado</span>
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.MontoMensual)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.MontoMensual)
+            </dd>
+        </dl>
+
+        <div class="mb-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+        </div>
+    </div>
+</div>

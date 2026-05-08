@@ -61,5 +61,69 @@ namespace MercadoApp.Controllers
             
             return View(pago);
         }
+
+        public IActionResult Details(int id)
+        {
+            var pago = _pagoRepository.GetById(id);
+            if (pago == null) return NotFound();
+            return View(pago);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var pago = _pagoRepository.GetById(id);
+            if (pago == null) return NotFound();
+
+            var deudasPendientes = _deudaRepository.GetAll().Select(d => new
+            {
+                IdDeuda = d.IdDeuda,
+                Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
+            }).ToList();
+
+            ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion", pago.IdDeuda);
+            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres", pago.IdPersona);
+            
+            return View(pago);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Pago pago)
+        {
+            if (ModelState.IsValid)
+            {
+                _pagoRepository.Update(pago);
+                TempData["Mensaje"] = "Pago actualizado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var deudasPendientes = _deudaRepository.GetAll().Select(d => new
+            {
+                IdDeuda = d.IdDeuda,
+                Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
+            }).ToList();
+
+            ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion", pago.IdDeuda);
+            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres", pago.IdPersona);
+            
+            return View(pago);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            var pago = _pagoRepository.GetById(id);
+            if (pago != null)
+            {
+                var deuda = _deudaRepository.GetById(pago.IdDeuda);
+                if (deuda != null)
+                {
+                    deuda.Pagada = false;
+                    _deudaRepository.Update(deuda);
+                }
+            }
+            _pagoRepository.Delete(id);
+            TempData["Mensaje"] = "Pago eliminado correctamente. La deuda ha sido marcada como pendiente.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

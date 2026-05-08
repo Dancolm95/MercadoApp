@@ -64,6 +64,7 @@
                 <td>@item.MontoMensual.ToString("C")</td>
                 <td>@(item.IdPersona.HasValue ? item.IdPersona.Value.ToString() : "N/A")</td>
                 <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
                     <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este puesto?');">
                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>

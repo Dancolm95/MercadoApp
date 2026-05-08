@@ -1,0 +1,62 @@
+@model MercadoApp.Models.Deuda
+
+@{
+    ViewData["Title"] = "Editar Deuda";
+}
+
+<h2>Editar Deuda</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IdDeuda" />
+            
+            <div class="mb-3">
+                <label asp-for="IdPuesto" class="form-label"></label>
+                <select asp-for="IdPuesto" class="form-select" asp-items="ViewBag.Puestos">
+                    <option value="">-- Seleccione un puesto --</option>
+                </select>
+                <span asp-validation-for="IdPuesto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TipoServicio" class="form-label"></label>
+                <select asp-for="TipoServicio" class="form-select">
+                    <option value="">-- Seleccione un servicio --</option>
+                    <option value="Limpieza">Limpieza</option>
+                    <option value="Luz">Luz</option>
+                    <option value="Vigilancia">Vigilancia</option>
+                    <option value="Arbitrios">Arbitrios</option>
+                </select>
+                <span asp-validation-for="TipoServicio" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Monto" class="form-label"></label>
+                <input asp-for="Monto" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Monto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FechaGenerada" class="form-label"></label>
+                <input asp-for="FechaGenerada" class="form-control" type="date" />
+                <span asp-validation-for="FechaGenerada" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="Pagada" class="form-check-input" />
+                <label asp-for="Pagada" class="form-check-label">¿Está pagada?</label>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

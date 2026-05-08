@@ -1,0 +1,59 @@
+@model MercadoApp.Models.Pago
+
+@{
+    ViewData["Title"] = "Editar Pago";
+}
+
+<h2>Editar Pago</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IdPago" />
+            
+            <div class="mb-3">
+                <label asp-for="IdDeuda" class="form-label"></label>
+                <select asp-for="IdDeuda" class="form-select" asp-items="ViewBag.Deudas">
+                    <option value="">-- Seleccione una deuda --</option>
+                </select>
+                <span asp-validation-for="IdDeuda" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="IdPersona" class="form-label"></label>
+                <select asp-for="IdPersona" class="form-select" asp-items="ViewBag.Personas">
+                    <option value="">-- Seleccione una persona --</option>
+                </select>
+                <span asp-validation-for="IdPersona" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FechaPago" class="form-label"></label>
+                <input asp-for="FechaPago" class="form-control" type="date" />
+                <span asp-validation-for="FechaPago" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MontoPagado" class="form-label"></label>
+                <input asp-for="MontoPagado" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="MontoPagado" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Referencia" class="form-label"></label>
+                <input asp-for="Referencia" class="form-control" />
+                <span asp-validation-for="Referencia" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -37,6 +37,7 @@
             <th>Monto</th>
             <th>Fecha Generada</th>
             <th>Estado</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -56,6 +57,13 @@
                     {
                         <span class="badge bg-danger">Pendiente</span>
                     }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.IdDeuda" class="btn btn-sm btn-info">Detalles</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdDeuda" class="btn btn-sm btn-warning">Editar</a>
+                    <form asp-action="Delete" asp-route-id="@item.IdDeuda" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar esta deuda?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
                 </td>
             </tr>
         }

@@ -26,6 +26,7 @@
             <th>Fecha</th>
             <th>Monto Pagado</th>
             <th>Referencia</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -38,6 +39,13 @@
                 <td>@item.FechaPago.ToShortDateString()</td>
                 <td><span class="text-success fw-bold">@item.MontoPagado.ToString("C")</span></td>
                 <td>@item.Referencia</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.IdPago" class="btn btn-sm btn-info">Detalles</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdPago" class="btn btn-sm btn-warning">Editar</a>
+                    <form asp-action="Delete" asp-route-id="@item.IdPago" method="post" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar este pago?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>

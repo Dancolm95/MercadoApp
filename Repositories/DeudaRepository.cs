@@ -111,5 +111,67 @@ namespace MercadoApp.Repositories
                 }
             }
         }
+
+        public Deuda? GetById(int id)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT d.IdDeuda, d.IdPuesto, d.TipoServicio, d.Monto, d.FechaGenerada, d.Pagada, p.NumeroPuesto 
+                    FROM Deuda d
+                    INNER JOIN Puesto p ON d.IdPuesto = p.IdPuesto
+                    WHERE d.IdDeuda = @Id";
+
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Deuda
+                        {
+                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
+                            IdPuesto = Convert.ToInt32(reader["IdPuesto"]),
+                            TipoServicio = reader["TipoServicio"].ToString(),
+                            Monto = Convert.ToDecimal(reader["Monto"]),
+                            FechaGenerada = Convert.ToDateTime(reader["FechaGenerada"]),
+                            Pagada = Convert.ToBoolean(reader["Pagada"]),
+                            NumeroPuesto = reader["NumeroPuesto"].ToString()
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+
+        public void Update(Deuda deuda)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = "UPDATE Deuda SET IdPuesto = @IdPuesto, TipoServicio = @TipoServicio, Monto = @Monto, FechaGenerada = @FechaGenerada, Pagada = @Pagada WHERE IdDeuda = @IdDeuda";
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@IdDeuda", deuda.IdDeuda);
+                cmd.Parameters.AddWithValue("@IdPuesto", deuda.IdPuesto);
+                cmd.Parameters.AddWithValue("@TipoServicio", deuda.TipoServicio);
+                cmd.Parameters.AddWithValue("@Monto", deuda.Monto);
+                cmd.Parameters.AddWithValue("@FechaGenerada", deuda.FechaGenerada);
+                cmd.Parameters.AddWithValue("@Pagada", deuda.Pagada);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Delete(int id)
+        {
+            using (var con = new SqlConnection(_connectionString))
+            {
+                var query = "DELETE FROM Deuda WHERE IdDeuda = @Id";
+                var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

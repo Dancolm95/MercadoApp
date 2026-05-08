@@ -46,5 +46,41 @@ namespace MercadoApp.Controllers
             ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
             return View(deuda);
         }
+
+        public IActionResult Details(int id)
+        {
+            var deuda = _deudaRepository.GetById(id);
+            if (deuda == null) return NotFound();
+            return View(deuda);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var deuda = _deudaRepository.GetById(id);
+            if (deuda == null) return NotFound();
+            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
+            return View(deuda);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Deuda deuda)
+        {
+            if (ModelState.IsValid)
+            {
+                _deudaRepository.Update(deuda);
+                TempData["Mensaje"] = "Deuda actualizada correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
+            return View(deuda);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            _deudaRepository.Delete(id);
+            TempData["Mensaje"] = "Deuda eliminada correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

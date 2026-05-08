@@ -7,6 +7,9 @@ namespace MercadoApp.Repositories.Interfaces
     {
         IEnumerable<Deuda> GetAll();
         IEnumerable<Deuda> GetByPuesto(int idPuesto);
+        Deuda? GetById(int id);
         void RegistrarDeuda(Deuda deuda);
+        void Update(Deuda deuda);
+        void Delete(int id);
     }
 }

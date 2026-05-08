@@ -1,0 +1,61 @@
+@model MercadoApp.Models.Deuda
+
+@{
+    ViewData["Title"] = "Detalles de Deuda";
+}
+
+<h2>Detalles de Deuda</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.IdDeuda)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.IdDeuda)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.NumeroPuesto)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.NumeroPuesto)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.TipoServicio)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.TipoServicio)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Monto)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Monto)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.FechaGenerada)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.FechaGenerada)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Pagada)
+            </dt>
+            <dd class="col-sm-8">
+                @(Model.Pagada ? "Sí" : "No")
+            </dd>
+        </dl>
+
+        <div class="mb-3">
+            <a asp-action="Edit" asp-route-id="@Model.IdDeuda" class="btn btn-warning">Editar</a>
+            <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+        </div>
+    </div>
+</div>

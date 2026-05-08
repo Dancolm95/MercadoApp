@@ -63,5 +63,12 @@ namespace MercadoApp.Controllers
             TempData["Mensaje"] = "Persona eliminada correctamente de la base de datos.";
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult Details(int id)
+        {
+            var persona = _personaRepository.GetById(id);
+            if (persona == null) return NotFound();
+            return View(persona);
+        }
     }
 }
