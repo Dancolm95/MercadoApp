@@ -3,4 +3,5 @@ task.md
 
 bin/
 obj/
-appsettings.Development.json
+appsettings.Development.
+appsettings.json
