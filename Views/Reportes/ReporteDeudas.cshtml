@@ -7,6 +7,8 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Reporte de Deudas</h2>
     <div>
+        <a asp-action="ExportarDeudasPdf" asp-route-fechaInicio="@ViewBag.FechaInicio" asp-route-fechaFin="@ViewBag.FechaFin" class="btn btn-danger">Descargar PDF</a>
+        <a asp-action="ExportarDeudasExcel" asp-route-fechaInicio="@ViewBag.FechaInicio" asp-route-fechaFin="@ViewBag.FechaFin" class="btn btn-success">Descargar Excel</a>
         <a asp-action="Index" class="btn btn-secondary">Nuevo Reporte</a>
         <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-primary">Dashboard</a>
     </div>
