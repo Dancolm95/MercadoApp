@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class PersonasController : Controller
     {
         private readonly IPersonaRepository _personaRepository;
@@ -14,9 +17,9 @@ namespace MercadoApp.Controllers
             _personaRepository = personaRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var personas = _personaRepository.GetAll();
+            var personas = await _personaRepository.GetAllAsync();
             return View(personas.ToList());
         }
 
@@ -26,30 +29,30 @@ namespace MercadoApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Persona p)
+        public async Task<IActionResult> Create(Persona p)
         {
             if (ModelState.IsValid)
             {
-                _personaRepository.Create(p);
+                await _personaRepository.CreateAsync(p);
                 TempData["Mensaje"] = "Persona registrada correctamente en la base de datos.";
                 return RedirectToAction(nameof(Index));
             }
             return View(p);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var persona = _personaRepository.GetById(id);
+            var persona = await _personaRepository.GetByIdAsync(id);
             if (persona == null) return NotFound();
             return View(persona);
         }
 
         [HttpPost]
-        public IActionResult Edit(Persona p)
+        public async Task<IActionResult> Edit(Persona p)
         {
             if (ModelState.IsValid)
             {
-                _personaRepository.Update(p);
+                await _personaRepository.UpdateAsync(p);
                 TempData["Mensaje"] = "Persona actualizada correctamente en la base de datos.";
                 return RedirectToAction(nameof(Index));
             }
@@ -57,11 +60,18 @@ namespace MercadoApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _personaRepository.Delete(id);
+            await _personaRepository.DeleteAsync(id);
             TempData["Mensaje"] = "Persona eliminada correctamente de la base de datos.";
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var persona = await _personaRepository.GetByIdAsync(id);
+            if (persona == null) return NotFound();
+            return View(persona);
         }
     }
 }

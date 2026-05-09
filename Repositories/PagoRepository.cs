@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using Dapper;
+using MercadoApp.Data;
 using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 
@@ -9,86 +10,131 @@ namespace MercadoApp.Repositories
 {
     public class PagoRepository : IPagoRepository
     {
-        private readonly string _connectionString;
+        private readonly IDbConnectionFactory _connectionFactory;
 
-        public PagoRepository(IConfiguration configuration)
+        public PagoRepository(IDbConnectionFactory connectionFactory)
         {
-            _connectionString = configuration.GetConnectionString("MercadoDB") ?? throw new InvalidOperationException("Connection string 'MercadoDB' not found.");
+            _connectionFactory = connectionFactory;
         }
 
-        public IEnumerable<Pago> GetAll()
+        public async Task<IEnumerable<Pago>> GetAllAsync()
         {
-            var pagos = new List<Pago>();
-            using (var con = new SqlConnection(_connectionString))
-            {
-                var query = @"
-                    SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
-                           d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
-                           per.Nombres + ' ' + per.Apellidos AS NombrePersona
-                    FROM Pago p
-                    INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
-                    INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
-                    INNER JOIN Persona per ON p.IdPersona = per.IdPersona";
-
-                var cmd = new SqlCommand(query, con);
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        pagos.Add(new Pago
-                        {
-                            IdPago = Convert.ToInt32(reader["IdPago"]),
-                            IdDeuda = Convert.ToInt32(reader["IdDeuda"]),
-                            IdPersona = Convert.ToInt32(reader["IdPersona"]),
-                            FechaPago = Convert.ToDateTime(reader["FechaPago"]),
-                            MontoPagado = Convert.ToDecimal(reader["MontoPagado"]),
-                            Referencia = reader["Referencia"].ToString(),
-                            DetallesDeuda = reader["DetallesDeuda"].ToString(),
-                            NombrePersona = reader["NombrePersona"].ToString()
-                        });
-                    }
-                }
-            }
-            return pagos;
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = @"SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                              d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                              per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                       FROM Pago p
+                       INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                       INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                       INNER JOIN Persona per ON p.IdPersona = per.IdPersona";
+            return await connection.QueryAsync<Pago>(sql);
         }
 
-        public void RegistrarPago(Pago pago)
+        public async Task<Pago?> GetByIdAsync(int id)
         {
-            using (var con = new SqlConnection(_connectionString))
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = @"SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                              d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                              per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                       FROM Pago p
+                       INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                       INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                       INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                       WHERE p.IdPago = @Id";
+            return await connection.QuerySingleOrDefaultAsync<Pago>(sql, new { Id = id });
+        }
+
+        public async Task<int> CreateAsync(Pago pago)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
             {
-                con.Open();
-                using (var transaction = con.BeginTransaction())
-                {
-                    try
-                    {
-                        var cmdInsert = new SqlCommand(
-                            "INSERT INTO Pago (IdDeuda, IdPersona, FechaPago, MontoPagado, Referencia) " +
-                            "VALUES (@IdDeuda, @IdPersona, @FechaPago, @MontoPagado, @Referencia)", con, transaction);
-                        
-                        cmdInsert.Parameters.AddWithValue("@IdDeuda", pago.IdDeuda);
-                        cmdInsert.Parameters.AddWithValue("@IdPersona", pago.IdPersona);
-                        cmdInsert.Parameters.AddWithValue("@FechaPago", pago.FechaPago);
-                        cmdInsert.Parameters.AddWithValue("@MontoPagado", pago.MontoPagado);
-                        cmdInsert.Parameters.AddWithValue("@Referencia", pago.Referencia ?? (object)DBNull.Value);
+                var sqlInsert = @"INSERT INTO Pago (IdDeuda, IdPersona, FechaPago, MontoPagado, Referencia) 
+                                 VALUES (@IdDeuda, @IdPersona, @FechaPago, @MontoPagado, @Referencia);
+                                 SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                var idPago = await connection.ExecuteScalarAsync<int>(sqlInsert, pago, transaction);
 
-                        cmdInsert.ExecuteNonQuery();
+                await connection.ExecuteAsync(
+                    "UPDATE Deuda SET Pagada = 1 WHERE IdDeuda = @IdDeuda",
+                    new { pago.IdDeuda }, transaction);
 
-                        var cmdUpdateDeuda = new SqlCommand(
-                            "UPDATE Deuda SET Pagada = 1 WHERE IdDeuda = @IdDeuda", con, transaction);
-                        cmdUpdateDeuda.Parameters.AddWithValue("@IdDeuda", pago.IdDeuda);
-                        
-                        cmdUpdateDeuda.ExecuteNonQuery();
-
-                        transaction.Commit();
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
+                transaction.Commit();
+                return idPago;
             }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public async Task UpdateAsync(Pago pago)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                var sql = @"UPDATE Pago SET IdDeuda = @IdDeuda, IdPersona = @IdPersona, 
+                            FechaPago = @FechaPago, MontoPagado = @MontoPagado, Referencia = @Referencia 
+                            WHERE IdPago = @IdPago";
+                await connection.ExecuteAsync(sql, pago, transaction);
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync("DELETE FROM Pago WHERE IdPago = @Id", new { Id = id });
+        }
+
+        public async Task<int> GetCountAsync()
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Pago");
+        }
+
+        public async Task<decimal> GetTotalIngresosAsync()
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            return await connection.ExecuteScalarAsync<decimal>("SELECT ISNULL(SUM(MontoPagado), 0) FROM Pago");
+        }
+
+        public async Task<IEnumerable<Pago>> GetByFechaAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = @"SELECT p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                              d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                              per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                       FROM Pago p
+                       INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                       INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                       INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                       WHERE p.FechaPago BETWEEN @FechaInicio AND @FechaFin
+                       ORDER BY p.FechaPago DESC";
+            return await connection.QueryAsync<Pago>(sql, new { FechaInicio = fechaInicio, FechaFin = fechaFin });
+        }
+
+        public async Task<IEnumerable<Pago>> GetRecentAsync(int count)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = $@"SELECT TOP {count} p.IdPago, p.IdDeuda, p.IdPersona, p.FechaPago, p.MontoPagado, p.Referencia,
+                              d.TipoServicio + ' - Puesto ' + pue.NumeroPuesto AS DetallesDeuda,
+                              per.Nombres + ' ' + per.Apellidos AS NombrePersona
+                         FROM Pago p
+                         INNER JOIN Deuda d ON p.IdDeuda = d.IdDeuda
+                         INNER JOIN Puesto pue ON d.IdPuesto = pue.IdPuesto
+                         INNER JOIN Persona per ON p.IdPersona = per.IdPersona
+                         ORDER BY p.IdPago DESC";
+            return await connection.QueryAsync<Pago>(sql);
         }
     }
 }

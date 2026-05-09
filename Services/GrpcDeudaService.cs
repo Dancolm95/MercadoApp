@@ -15,9 +15,9 @@ namespace MercadoApp.Services
             _deudaRepository = deudaRepository;
         }
 
-        public override Task<DeudaListResponse> GetDeudas(EmptyRequest request, ServerCallContext context)
+        public override async Task<DeudaListResponse> GetDeudas(EmptyRequest request, ServerCallContext context)
         {
-            var deudas = _deudaRepository.GetAll();
+            var deudas = await _deudaRepository.GetAllAsync();
             var response = new DeudaListResponse();
 
             response.Deudas.AddRange(deudas.Select(d => new DeudaMessage
@@ -31,12 +31,12 @@ namespace MercadoApp.Services
                 NumeroPuesto = d.NumeroPuesto ?? ""
             }));
 
-            return Task.FromResult(response);
+            return response;
         }
 
-        public override Task<DeudaListResponse> GetDeudasByPuesto(PuestoRequest request, ServerCallContext context)
+        public override async Task<DeudaListResponse> GetDeudasByPuesto(PuestoRequest request, ServerCallContext context)
         {
-            var deudas = _deudaRepository.GetByPuesto(request.IdPuesto);
+            var deudas = await _deudaRepository.GetByPuestoAsync(request.IdPuesto);
             var response = new DeudaListResponse();
 
             response.Deudas.AddRange(deudas.Select(d => new DeudaMessage
@@ -50,7 +50,7 @@ namespace MercadoApp.Services
                 NumeroPuesto = d.NumeroPuesto ?? ""
             }));
 
-            return Task.FromResult(response);
+            return response;
         }
     }
 }

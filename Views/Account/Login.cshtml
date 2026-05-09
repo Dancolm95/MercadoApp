@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    var returnUrl = ViewData["ReturnUrl"];
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-center">MercadoApp</h4>
+                    <p class="text-center text-muted">Iniciar sesión</p>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

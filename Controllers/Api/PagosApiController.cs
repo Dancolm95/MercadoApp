@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers.Api
 {
     [Route("api/pagos")]
     [ApiController]
+    [Authorize(Roles = "Admin,Cajero")]
     public class PagosApiController : ControllerBase
     {
         private readonly IPagoRepository _pagoRepository;
@@ -16,24 +19,22 @@ namespace MercadoApp.Controllers.Api
             _pagoRepository = pagoRepository;
         }
 
-        // GET: api/pagosapi
         [HttpGet]
-        public ActionResult<IEnumerable<Pago>> GetPagos()
+        public async Task<ActionResult<IEnumerable<Pago>>> GetPagos()
         {
-            var pagos = _pagoRepository.GetAll();
+            var pagos = await _pagoRepository.GetAllAsync();
             return Ok(pagos);
         }
 
-        // POST: api/pagosapi
         [HttpPost]
-        public ActionResult<Pago> PostPago([FromBody] Pago pago)
+        public async Task<ActionResult<Pago>> PostPago([FromBody] Pago pago)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _pagoRepository.RegistrarPago(pago);
+            await _pagoRepository.CreateAsync(pago);
             
             return Ok(new { message = "Pago registrado exitosamente", pago });
         }
