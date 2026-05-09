@@ -4,6 +4,7 @@ using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers
 {
@@ -18,9 +19,9 @@ namespace MercadoApp.Controllers
             _puestoRepository = puestoRepository;
         }
 
-        public IActionResult Index(bool? pagada = null)
+        public async Task<IActionResult> Index(bool? pagada = null)
         {
-            var deudas = _deudaRepository.GetAll();
+            var deudas = await _deudaRepository.GetAllAsync();
             if (pagada.HasValue)
             {
                 deudas = deudas.Where(d => d.Pagada == pagada.Value);
@@ -28,57 +29,61 @@ namespace MercadoApp.Controllers
             return View(deudas.ToList());
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto");
+            var puestos = await _puestoRepository.GetAllAsync();
+            ViewBag.Puestos = new SelectList(puestos, "Id", "NumeroPuesto");
             return View(new Deuda { FechaGenerada = DateTime.Today });
         }
 
         [HttpPost]
-        public IActionResult Create(Deuda deuda)
+        public async Task<IActionResult> Create(Deuda deuda)
         {
             if (ModelState.IsValid)
             {
-                _deudaRepository.RegistrarDeuda(deuda);
+                await _deudaRepository.CreateAsync(deuda);
                 TempData["Mensaje"] = "Deuda registrada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
+            var puestos = await _puestoRepository.GetAllAsync();
+            ViewBag.Puestos = new SelectList(puestos, "Id", "NumeroPuesto", deuda.IdPuesto);
             return View(deuda);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var deuda = _deudaRepository.GetById(id);
+            var deuda = await _deudaRepository.GetByIdAsync(id);
             if (deuda == null) return NotFound();
             return View(deuda);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var deuda = _deudaRepository.GetById(id);
+            var deuda = await _deudaRepository.GetByIdAsync(id);
             if (deuda == null) return NotFound();
-            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
+            var puestos = await _puestoRepository.GetAllAsync();
+            ViewBag.Puestos = new SelectList(puestos, "Id", "NumeroPuesto", deuda.IdPuesto);
             return View(deuda);
         }
 
         [HttpPost]
-        public IActionResult Edit(Deuda deuda)
+        public async Task<IActionResult> Edit(Deuda deuda)
         {
             if (ModelState.IsValid)
             {
-                _deudaRepository.Update(deuda);
+                await _deudaRepository.UpdateAsync(deuda);
                 TempData["Mensaje"] = "Deuda actualizada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Puestos = new SelectList(_puestoRepository.GetAll(), "Id", "NumeroPuesto", deuda.IdPuesto);
+            var puestos = await _puestoRepository.GetAllAsync();
+            ViewBag.Puestos = new SelectList(puestos, "Id", "NumeroPuesto", deuda.IdPuesto);
             return View(deuda);
         }
 
         [HttpPost]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _deudaRepository.Delete(id);
+            await _deudaRepository.DeleteAsync(id);
             TempData["Mensaje"] = "Deuda eliminada correctamente.";
             return RedirectToAction(nameof(Index));
         }

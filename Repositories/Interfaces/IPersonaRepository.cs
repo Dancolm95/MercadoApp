@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MercadoApp.Models;
 
 namespace MercadoApp.Repositories.Interfaces
 {
     public interface IPersonaRepository
     {
-        IEnumerable<Persona> GetAll();
-        Persona GetById(int id);
-        void Create(Persona persona);
-        void Update(Persona persona);
-        void Delete(int id);
+        Task<IEnumerable<Persona>> GetAllAsync();
+        Task<Persona?> GetByIdAsync(int id);
+        Task<int> CreateAsync(Persona persona);
+        Task UpdateAsync(Persona persona);
+        Task DeleteAsync(int id);
     }
 }

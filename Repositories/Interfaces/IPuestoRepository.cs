@@ -1,16 +1,17 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MercadoApp.Models;
 
 namespace MercadoApp.Repositories.Interfaces
 {
     public interface IPuestoRepository
     {
-        IEnumerable<Puesto> GetAll();
-        Puesto GetById(int id);
-        void Create(Puesto puesto);
-        void Update(Puesto puesto);
-        void Delete(int id);
-        int GetCountByEstado(string estado);
-        IEnumerable<Puesto> GetRecent(int count);
+        Task<IEnumerable<Puesto>> GetAllAsync();
+        Task<Puesto?> GetByIdAsync(int id);
+        Task<int> CreateAsync(Puesto puesto);
+        Task UpdateAsync(Puesto puesto);
+        Task DeleteAsync(int id);
+        Task<int> GetCountByEstadoAsync(string estado);
+        Task<IEnumerable<Puesto>> GetRecentAsync(int count);
     }
 }

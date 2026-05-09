@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers.Api
 {
@@ -16,19 +17,17 @@ namespace MercadoApp.Controllers.Api
             _puestoRepository = puestoRepository;
         }
 
-        // GET: api/puestosapi
         [HttpGet]
-        public ActionResult<IEnumerable<Puesto>> GetPuestos()
+        public async Task<ActionResult<IEnumerable<Puesto>>> GetPuestos()
         {
-            var puestos = _puestoRepository.GetAll();
+            var puestos = await _puestoRepository.GetAllAsync();
             return Ok(puestos);
         }
 
-        // GET: api/puestosapi/5
         [HttpGet("{id}")]
-        public ActionResult<Puesto> GetPuesto(int id)
+        public async Task<ActionResult<Puesto>> GetPuesto(int id)
         {
-            var puesto = _puestoRepository.GetById(id);
+            var puesto = await _puestoRepository.GetByIdAsync(id);
 
             if (puesto == null)
             {
@@ -38,24 +37,21 @@ namespace MercadoApp.Controllers.Api
             return Ok(puesto);
         }
 
-        // POST: api/puestosapi
         [HttpPost]
-        public ActionResult<Puesto> PostPuesto([FromBody] Puesto puesto)
+        public async Task<ActionResult<Puesto>> PostPuesto([FromBody] Puesto puesto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _puestoRepository.Create(puesto);
+            await _puestoRepository.CreateAsync(puesto);
             
-            // Assuming Create populates the Id, if not, this still returns Ok
             return CreatedAtAction(nameof(GetPuesto), new { id = puesto.Id }, puesto);
         }
 
-        // PUT: api/puestosapi/5
         [HttpPut("{id}")]
-        public IActionResult PutPuesto(int id, [FromBody] Puesto puesto)
+        public async Task<IActionResult> PutPuesto(int id, [FromBody] Puesto puesto)
         {
             if (id != puesto.Id)
             {
@@ -67,28 +63,27 @@ namespace MercadoApp.Controllers.Api
                 return BadRequest(ModelState);
             }
 
-            var existingPuesto = _puestoRepository.GetById(id);
+            var existingPuesto = await _puestoRepository.GetByIdAsync(id);
             if (existingPuesto == null)
             {
                 return NotFound();
             }
 
-            _puestoRepository.Update(puesto);
+            await _puestoRepository.UpdateAsync(puesto);
 
             return NoContent();
         }
 
-        // DELETE: api/puestosapi/5
         [HttpDelete("{id}")]
-        public IActionResult DeletePuesto(int id)
+        public async Task<IActionResult> DeletePuesto(int id)
         {
-            var puesto = _puestoRepository.GetById(id);
+            var puesto = await _puestoRepository.GetByIdAsync(id);
             if (puesto == null)
             {
                 return NotFound();
             }
 
-            _puestoRepository.Delete(id);
+            await _puestoRepository.DeleteAsync(id);
 
             return NoContent();
         }

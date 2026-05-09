@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers.Api
 {
@@ -16,32 +17,29 @@ namespace MercadoApp.Controllers.Api
             _deudaRepository = deudaRepository;
         }
 
-        // GET: api/deudas
         [HttpGet]
-        public ActionResult<IEnumerable<Deuda>> GetDeudas()
+        public async Task<ActionResult<IEnumerable<Deuda>>> GetDeudas()
         {
-            var deudas = _deudaRepository.GetAll();
+            var deudas = await _deudaRepository.GetAllAsync();
             return Ok(deudas);
         }
 
-        // GET: api/deudas/puesto/5
         [HttpGet("puesto/{idPuesto}")]
-        public ActionResult<IEnumerable<Deuda>> GetDeudasByPuesto(int idPuesto)
+        public async Task<ActionResult<IEnumerable<Deuda>>> GetDeudasByPuesto(int idPuesto)
         {
-            var deudas = _deudaRepository.GetByPuesto(idPuesto);
+            var deudas = await _deudaRepository.GetByPuestoAsync(idPuesto);
             return Ok(deudas);
         }
 
-        // POST: api/deudas
         [HttpPost]
-        public ActionResult<Deuda> PostDeuda([FromBody] Deuda deuda)
+        public async Task<ActionResult<Deuda>> PostDeuda([FromBody] Deuda deuda)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _deudaRepository.RegistrarDeuda(deuda);
+            await _deudaRepository.CreateAsync(deuda);
             
             return Ok(new { message = "Deuda registrada exitosamente", deuda });
         }

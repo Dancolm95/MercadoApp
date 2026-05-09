@@ -4,6 +4,7 @@ using MercadoApp.Models;
 using MercadoApp.Repositories.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MercadoApp.Controllers
 {
@@ -20,108 +21,120 @@ namespace MercadoApp.Controllers
             _personaRepository = personaRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var pagos = _pagoRepository.GetAll();
+            var pagos = await _pagoRepository.GetAllAsync();
             return View(pagos);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var deudasPendientes = _deudaRepository.GetAll().Where(d => !d.Pagada).Select(d => new
+            var deudas = await _deudaRepository.GetAllAsync();
+            var deudasPendientes = deudas.Where(d => !d.Pagada).Select(d => new
             {
                 IdDeuda = d.IdDeuda,
                 Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
             }).ToList();
 
+            var personas = await _personaRepository.GetAllAsync();
+            
             ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion");
-            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres");
+            ViewBag.Personas = new SelectList(personas, "IdPersona", "Nombres");
             
             return View(new Pago { FechaPago = DateTime.Today });
         }
 
         [HttpPost]
-        public IActionResult Create(Pago pago)
+        public async Task<IActionResult> Create(Pago pago)
         {
             if (ModelState.IsValid)
             {
-                _pagoRepository.RegistrarPago(pago);
+                await _pagoRepository.CreateAsync(pago);
                 TempData["Mensaje"] = "Pago registrado correctamente. La deuda ha sido marcada como pagada.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var deudasPendientes = _deudaRepository.GetAll().Where(d => !d.Pagada).Select(d => new
+            var deudas = await _deudaRepository.GetAllAsync();
+            var deudasPendientes = deudas.Where(d => !d.Pagada).Select(d => new
             {
                 IdDeuda = d.IdDeuda,
                 Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
             }).ToList();
 
+            var personas = await _personaRepository.GetAllAsync();
+
             ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion", pago.IdDeuda);
-            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres", pago.IdPersona);
+            ViewBag.Personas = new SelectList(personas, "IdPersona", "Nombres", pago.IdPersona);
             
             return View(pago);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var pago = _pagoRepository.GetById(id);
+            var pago = await _pagoRepository.GetByIdAsync(id);
             if (pago == null) return NotFound();
             return View(pago);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var pago = _pagoRepository.GetById(id);
+            var pago = await _pagoRepository.GetByIdAsync(id);
             if (pago == null) return NotFound();
 
-            var deudasPendientes = _deudaRepository.GetAll().Select(d => new
+            var deudas = await _deudaRepository.GetAllAsync();
+            var deudasList = deudas.Select(d => new
             {
                 IdDeuda = d.IdDeuda,
                 Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
             }).ToList();
 
-            ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion", pago.IdDeuda);
-            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres", pago.IdPersona);
+            var personas = await _personaRepository.GetAllAsync();
+
+            ViewBag.Deudas = new SelectList(deudasList, "IdDeuda", "Descripcion", pago.IdDeuda);
+            ViewBag.Personas = new SelectList(personas, "IdPersona", "Nombres", pago.IdPersona);
             
             return View(pago);
         }
 
         [HttpPost]
-        public IActionResult Edit(Pago pago)
+        public async Task<IActionResult> Edit(Pago pago)
         {
             if (ModelState.IsValid)
             {
-                _pagoRepository.Update(pago);
+                await _pagoRepository.UpdateAsync(pago);
                 TempData["Mensaje"] = "Pago actualizado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var deudasPendientes = _deudaRepository.GetAll().Select(d => new
+            var deudas = await _deudaRepository.GetAllAsync();
+            var deudasList = deudas.Select(d => new
             {
                 IdDeuda = d.IdDeuda,
                 Descripcion = $"{d.TipoServicio} - Puesto {d.NumeroPuesto} - {d.Monto:C}"
             }).ToList();
 
-            ViewBag.Deudas = new SelectList(deudasPendientes, "IdDeuda", "Descripcion", pago.IdDeuda);
-            ViewBag.Personas = new SelectList(_personaRepository.GetAll(), "IdPersona", "Nombres", pago.IdPersona);
+            var personas = await _personaRepository.GetAllAsync();
+
+            ViewBag.Deudas = new SelectList(deudasList, "IdDeuda", "Descripcion", pago.IdDeuda);
+            ViewBag.Personas = new SelectList(personas, "IdPersona", "Nombres", pago.IdPersona);
             
             return View(pago);
         }
 
         [HttpPost]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var pago = _pagoRepository.GetById(id);
+            var pago = await _pagoRepository.GetByIdAsync(id);
             if (pago != null)
             {
-                var deuda = _deudaRepository.GetById(pago.IdDeuda);
+                var deuda = await _deudaRepository.GetByIdAsync(pago.IdDeuda);
                 if (deuda != null)
                 {
                     deuda.Pagada = false;
-                    _deudaRepository.Update(deuda);
+                    await _deudaRepository.UpdateAsync(deuda);
                 }
             }
-            _pagoRepository.Delete(id);
+            await _pagoRepository.DeleteAsync(id);
             TempData["Mensaje"] = "Pago eliminado correctamente. La deuda ha sido marcada como pendiente.";
             return RedirectToAction(nameof(Index));
         }

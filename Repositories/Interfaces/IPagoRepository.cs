@@ -1,18 +1,19 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MercadoApp.Models;
 
 namespace MercadoApp.Repositories.Interfaces
 {
     public interface IPagoRepository
     {
-        IEnumerable<Pago> GetAll();
-        Pago? GetById(int id);
-        void RegistrarPago(Pago pago);
-        void Update(Pago pago);
-        void Delete(int id);
-        int GetCount();
-        decimal GetTotalIngresos();
-        IEnumerable<Pago> GetByFecha(DateTime fechaInicio, DateTime fechaFin);
-        IEnumerable<Pago> GetRecent(int count);
+        Task<IEnumerable<Pago>> GetAllAsync();
+        Task<Pago?> GetByIdAsync(int id);
+        Task<int> CreateAsync(Pago pago);
+        Task UpdateAsync(Pago pago);
+        Task DeleteAsync(int id);
+        Task<int> GetCountAsync();
+        Task<decimal> GetTotalIngresosAsync();
+        Task<IEnumerable<Pago>> GetByFechaAsync(DateTime fechaInicio, DateTime fechaFin);
+        Task<IEnumerable<Pago>> GetRecentAsync(int count);
     }
 }
